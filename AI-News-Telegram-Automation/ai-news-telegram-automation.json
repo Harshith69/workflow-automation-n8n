@@ -179,7 +179,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const groups = $json.output.headline_groups;\n\nlet message = `📰 *Top Trending News – ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}*\\n\\n - harshith`;\n\ngroups.forEach(group => {\n  message += `*${group.section}*\\n`;\n  \n  group.headlines.forEach(headline => {\n    message += `• ${headline}\\n`;\n  });\n  \n  message += `\\n`;\n});\n\nreturn [\n  {\n    json: {\n      telegram_text: message\n    }\n  }\n];"
+        "jsCode": "const groups = $json.output.sections || [];\n\nlet message = `📰 *Top Trending News – ${new Date().toLocaleDateString('en-GB', {\n  day: '2-digit',\n  month: 'short',\n  year: 'numeric'\n})}*\\n\\n`;\n\ngroups.forEach(group => {\n  message += `*${group.title}*\\n`;\n\n  (group.items || []).forEach(headline => {\n    message += `• ${headline}\\n`;\n  });\n\n  message += `\\n`;\n});\n\nreturn [\n  {\n    json: {\n      telegram_text: message\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -339,7 +339,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "94ecfba1-a92b-43c5-b2a5-4b161beae719",
+  "versionId": "60efeb8b-27db-44d1-b677-b40f48020177",
   "meta": {
     "instanceId": "acc1bc6cb02741223328d012577186e13bb3a4426f5577317376f47c2946d114"
   },
