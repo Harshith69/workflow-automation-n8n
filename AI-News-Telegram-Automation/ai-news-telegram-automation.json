@@ -1,0 +1,348 @@
+{
+  "name": "News_Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7567b605-06f0-4a6d-a0c4-98979f21aa92",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        -300
+      ],
+      "id": "0159c879-8d6b-4dfb-a1b1-43d9fb4dbd0c",
+      "name": "Finance News"
+    },
+    {
+      "parameters": {
+        "url": "https://www.espn.com/espn/rss/news",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        -140
+      ],
+      "id": "6a3ce434-aacc-4517-ab96-a923c98fce4c",
+      "name": "Sports News"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        540,
+        -20
+      ],
+      "id": "84a99d5d-b9e1-4572-b988-539e07408d39",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "=You are a professional news editor.\n\nStart the newsletter with:\n\n📰 Top Trending News – {{ $now.format('DD MMM YYYY') }}\n\nThen format the following headlines into a clean Telegram newsletter.\n\nRules:\n- Use emoji section headers.\n- Group into:\n  📊 Finance\n  🤖 AI & Technology\n  🌍 Global Politics\n  🏅 Sports\n  🌎 Other World News\n- Use bullet format: • Headline\n- Do not include source names.\n- Keep it clean and spaced.\n- Return Telegram-ready Markdown text.\n\nHere is the list:\n\n{{ $json.newsBlock }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        920,
+        20
+      ],
+      "id": "b18af042-80b3-4f2e-b4c7-7be8ebe2bfbb",
+      "name": "AI Agent",
+      "retryOnFail": false,
+      "maxTries": 2,
+      "notesInFlow": false,
+      "notes": "Convert the following news summaries into a clean HTML format for an email: {{ $json.output }}"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        920,
+        260
+      ],
+      "id": "20e7eda9-91ed-4b2b-afed-caf4f99d5af6",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "kjOItZvcyOGpYyT3",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const combinedNews = items.map(item => {\n  return `• ${item.json.title}`;\n}).join(\"\\n\");\n\nreturn [\n  {\n    json: {\n      newsBlock: combinedNews\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        20
+      ],
+      "id": "9ab80c57-877a-45ab-8b21-2937533e367e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "chatId": "705601505",
+        "text": "={{ $json.telegram_text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1460,
+        20
+      ],
+      "id": "bf8f0fa2-24c3-4dc1-a13b-9ecd3468da16",
+      "name": "Telegram",
+      "credentials": {
+        "telegramApi": {
+          "id": "Qwv0BBgAS0ZOcLDO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/venturebeat/SZYF",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        20
+      ],
+      "id": "416b001d-7a56-46f9-84a2-0dd4f04b6e17",
+      "name": "AI News"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/politics/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        180
+      ],
+      "id": "f01fc2e9-c349-41e1-a334-78564031995a",
+      "name": "Politics News"
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        340
+      ],
+      "id": "ef16053e-b549-43a8-b715-5b94f2939eec",
+      "name": "World News"
+    },
+    {
+      "parameters": {
+        "jsCode": "const groups = $json.output.headline_groups;\n\nlet message = `📰 *Top Trending News – ${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}*\\n\\n - harshith`;\n\ngroups.forEach(group => {\n  message += `*${group.section}*\\n`;\n  \n  group.headlines.forEach(headline => {\n    message += `• ${headline}\\n`;\n  });\n  \n  message += `\\n`;\n});\n\nreturn [\n  {\n    json: {\n      telegram_text: message\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        20
+      ],
+      "id": "e02b96e8-7343-4ecf-88d4-8c4bffef941d",
+      "name": "Code1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Finance News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sports News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Politics News",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "World News",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Finance News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sports News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Politics News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "World News": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94ecfba1-a92b-43c5-b2a5-4b161beae719",
+  "meta": {
+    "instanceId": "acc1bc6cb02741223328d012577186e13bb3a4426f5577317376f47c2946d114"
+  },
+  "id": "99AbV868vQgRKj7T",
+  "tags": []
+}
